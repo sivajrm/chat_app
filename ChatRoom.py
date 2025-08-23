@@ -73,27 +73,21 @@ def talk_to_chat_bot(bot_name, chat_history, prompt, user_name, text_color):
     for line in multi_line_replies:
         print(line)
     print("\033[0m")
-    #add_to_history(chat_history, bot_name, model_reply)
     return model_reply
-
 
 def parse_response(json_response):
     response_json = json.loads(json_response)
     return response_json.get("model_output")
 
 def interact_with_chatbot(user_name, bot_name, topic):
-    chat_history_bot1 = []
-    chat_history_bot2 = []
     chat_history = []
     message = "Hello! How are you?, Do you know what's going on around " + topic
-    #add_to_history(chat_history_bot1, "user", message)
 
     prompt = message
     first_time = True
     while True:
         if not first_time:
-            add_to_history(chat_history_bot2, bot_name, message)
-            prompt = talk_to_chat_bot(user_name, chat_history_bot2, message, bot_name, "32m")
+            prompt = talk_to_chat_bot(user_name, chat_history, message, bot_name, "32m")
 
         else:
             first_time = False
@@ -101,9 +95,8 @@ def interact_with_chatbot(user_name, bot_name, topic):
             print(message + "\033[0m")
             message += "\n You are a strict bot. Only respond with the person speaking. Do not include any narrative, actions, or descriptions"
 
-        add_to_history(chat_history_bot1, user_name, prompt)
         add_to_history(chat_history, user_name, prompt)
-        bot_message = talk_to_chat_bot(bot_name, chat_history_bot1, prompt, user_name, "34m")
+        bot_message = talk_to_chat_bot(bot_name, chat_history, prompt, user_name, "34m")
         message = bot_message
         add_to_history(chat_history, bot_name, message)
 
