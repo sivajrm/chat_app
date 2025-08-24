@@ -58,11 +58,10 @@ class ChatDriver:
     def start_chat(self, topic: str):
         topic_embedding = self.sentence_transformer_model.encode(topic, show_progress_bar = False)
         message = f"Hello! How are you?, I would like to explore about {topic}"
+        self.chat_history.get_history().clear()
         self.chat_history.add_message(self.user_bot, message)
 
         print(f"\033[{self.user_bot.text_color}{self.user_bot.name}: {message}\033[0m")
-
-        message += "\nYou are a strict bot. Only respond with the person speaking. Do not include any narrative, actions, or descriptions"
 
         while True:
             prompt = self.chat_history.history[-1]['message']

@@ -17,6 +17,7 @@ class ChaiGptCommunicationService(LlmCommunicationService):
     def __init__(self, llm_service_provider_factory: LLMServiceProviderFactory):
         self.headers = None
         self.provider: LLMServiceProvider = llm_service_provider_factory.get_provider("chai_gpt")
+        self.prompt_format = "{safety_prompt} ###\n{prompt}"
         if self.provider is None:
             raise ValueError("Chai Gpt Communication Service is not initialized")
 
@@ -28,9 +29,10 @@ class ChaiGptCommunicationService(LlmCommunicationService):
             "Content-Type": "application/json",
             "Authorization" : "Bearer " + self.provider.auth_token
         }
+
         data = {
             "memory": "",
-            "prompt": prompt,
+            "prompt": self.prompt_format.format(safety_prompt=bot_agent.safety_prompt, prompt=prompt),
             "bot_name": bot_agent.name,
             "user_name": user_agent.name,
             "chat_history": chat_history

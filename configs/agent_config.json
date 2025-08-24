@@ -1,16 +1,19 @@
 [
   {
     "name": "siva",
+    "type": "user",
     "color": "35m",
     "llm_provider": "terminal"
   },
   {
     "name": "user_bot",
+    "type": "user",
     "color": "32m",
     "llm_provider": "chai_gpt"
   },
   {
     "name": "ai_bot",
+    "type": "ai",
     "color": "34m",
     "llm_provider": "chai_gpt",
     "enable_off_topic_check": true

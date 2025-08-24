@@ -30,8 +30,7 @@ class ChatService:
         if ai_agent.llm_provider != 'terminal':
             print("\n")
             ai_agent.print_name()
-            print(f"\033[{ai_agent.text_color}")
             for line in textwrap.wrap(clean_text, 60):
-                print(line)
+                print(f"\033[{ai_agent.text_color}{line}")
             print("\033[0m")
         return clean_text
