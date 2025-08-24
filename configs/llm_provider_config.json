@@ -5,5 +5,10 @@
       "api_key": "",
       "auth_token": "CR_14d43f2bf78b4b0590c2a8b87f354746",
       "retries" : 3
+    },
+
+    "terminal": {
+      "name": "Terminal user input",
+      "retries" : 1
     }
 }

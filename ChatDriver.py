@@ -17,18 +17,17 @@ class ChatDriver:
         self.llm_service_provider_factory : Optional[LLMServiceProviderFactory] = None
         self.llm_communication_service_factory : Optional[LLMCommunicationServiceFactory] = None
         self.agent_service_factory = None
-        self.user_bot = None
-        self.ai_bot = None
+        self.user_bot : Optional[Agent]  = None
+        self.ai_bot : Optional[Agent] = None
 
-    @staticmethod
-    def print_agent_info(agent: Agent) -> None:
-        print(f"Initializing Chat agent {agent.name} with agent provider " + agent.llm_provider)
+    def print_agent_info(self, agent: Agent) -> None:
+        print(f"Initializing Chat agent {agent.get_colored_name()} with agent provider " + agent.llm_provider)
 
     def init_setup(self):
         self.llm_service_provider_factory = LLMServiceProviderFactory("configs/llm_provider_config.json")
         self.llm_communication_service_factory = LLMCommunicationServiceFactory(self.llm_service_provider_factory)
         self.agent_service_factory = AgentServiceFactory("configs/agent_config.json")
-        self.user_bot = self.agent_service_factory.get_agent("user_bot")
+        self.user_bot = self.agent_service_factory.get_agent("siva") #user_bot
         self.ai_bot = self.agent_service_factory.get_agent("ai_bot")
         self.print_agent_info(self.user_bot)
         self.print_agent_info(self.ai_bot)
@@ -44,12 +43,13 @@ class ChatDriver:
         clean_text = ResponseParser.clean(raw_text)
         self.chat_history.add_message(ai_agent, clean_text)
 
-        # Print nicely
-        print(f"\033[{ai_agent.text_color}{ai_agent.name}:")
-        for line in textwrap.wrap(clean_text, 60):
-            print(line)
-        print("\033[0m")
-
+        if ai_agent.llm_provider != 'terminal':
+            print("\n")
+            ai_agent.print_name()
+            print(f"\033[{ai_agent.text_color}")
+            for line in textwrap.wrap(clean_text, 60):
+                print(line)
+            print("\033[0m")
         return clean_text
 
 
@@ -57,7 +57,7 @@ class ChatDriver:
         message = f"Hello! How are you?, Do you know what's going on around {topic}"
         self.chat_history.add_message(self.user_bot, message)
 
-        print(f"\033[32m{self.user_bot.name}: {message}\033[0m")
+        print(f"\033[{self.user_bot.text_color}{self.user_bot.name}: {message}\033[0m")
 
         message += "\nYou are a strict bot. Only respond with the person speaking. Do not include any narrative, actions, or descriptions"
 

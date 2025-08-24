@@ -1,5 +1,10 @@
 [
   {
+    "name": "siva",
+    "color": "35m",
+    "llm_provider": "terminal"
+  },
+  {
     "name": "user_bot",
     "color": "32m",
     "llm_provider": "chai_gpt"
