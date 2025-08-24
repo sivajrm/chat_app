@@ -1,31 +1,24 @@
 import json
-import importlib
-
-from services.llm_services.llm_service import LLMService
+from services.llm_services.providers.llm_service_provider import LLMServiceProvider
 
 
-class LLMServiceFactory:
+class LLMServiceProviderFactory:
 
     def __init__(self, config_path: str):
+        self.providers = None
         with open(config_path) as f:
             self.config : dict = json.load(f)
+            self.providers = self.initialize_providers()
 
-    def initialize_providers(self) -> dict[str, LLMService]:
+    def initialize_providers(self) -> dict[str, LLMServiceProvider]:
         """
         Reads JSON and returns a dict of provider_name -> initialized provider instance
         """
         providers = {}
         for key, cfg in self.config.items():
-            provider_id = key
-            provider_type =
-
-            # dynamically import module
-            module_name = f"services.{provider_type.lower()}"  # services.openaiprovider
-            module = importlib.import_module(module_name)
-            cls = getattr(module, provider_type)
-
-            # remove "name" and "type" before passing kwargs
-            kwargs = {k: v for k, v in provider_cfg.items() if k not in ("name", "type")}
-            providers[provider_name] = cls(**kwargs)
+            providers[key] = LLMServiceProvider(key, cfg.get("name"), cfg.get("api_url"), cfg.get("api_key"), cfg.get("auth_token"), cfg.get("retries"))
 
         return providers
+
+    def get_provider(self, provider_id: str) -> LLMServiceProvider:
+        return self.providers[provider_id]

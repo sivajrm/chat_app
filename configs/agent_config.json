@@ -1,0 +1,13 @@
+[
+  {
+    "name": "user_bot",
+    "color": "32m",
+    "llm_provider": "chai_gpt"
+  },
+  {
+    "name": "ai_bot",
+    "color": "34m",
+    "llm_provider": "chai_gpt"
+  }
+]
+
