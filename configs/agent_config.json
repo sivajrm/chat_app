@@ -12,7 +12,8 @@
   {
     "name": "ai_bot",
     "color": "34m",
-    "llm_provider": "chai_gpt"
+    "llm_provider": "chai_gpt",
+    "enable_off_topic_check": true
   }
 ]
 

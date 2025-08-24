@@ -17,7 +17,7 @@ class AgentServiceFactory:
         """
         agents = {}
         for config in self.agent_configs:
-            agents[config.get("name")] = Agent(config.get("name"), config.get("color"), config.get("llm_provider"))
+            agents[config.get("name")] = Agent(config.get("name"), config.get("color"), config.get("llm_provider"), config.get("enable_off_topic_check"))
 
         return agents
 

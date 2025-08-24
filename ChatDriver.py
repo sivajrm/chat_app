@@ -1,78 +1,95 @@
+from collections import deque
 from typing import Optional
 
 from models.ChatHistory import ChatHistory
 from models.Agent import Agent
-import textwrap
 
 from services.agents.agent_service_factory import AgentServiceFactory
-from services.llm_services.communication.llm_communication_service import LlmCommunicationService
+from services.chat_service import ChatService
 from services.llm_services.communication.llm_communication_service_factory import LLMCommunicationServiceFactory
 from services.llm_services.providers.llm_service_provider_factory import LLMServiceProviderFactory
-from utils.response_parser import ResponseParser
-
+from utils.log_config import get_logger
+from sklearn.metrics.pairwise import cosine_similarity
+from sentence_transformers import SentenceTransformer
 
 class ChatDriver:
+
+    logger = get_logger("ChatDriver")
+
     def __init__(self):
         self.chat_history = ChatHistory()
-        self.llm_service_provider_factory : Optional[LLMServiceProviderFactory] = None
-        self.llm_communication_service_factory : Optional[LLMCommunicationServiceFactory] = None
         self.agent_service_factory = None
         self.user_bot : Optional[Agent]  = None
         self.ai_bot : Optional[Agent] = None
+        self.chat_service : Optional[ChatService] = None
+        self.sentence_transformer_model = SentenceTransformer('multi-qa-MiniLM-L6-cos-v1') #better with multi-qa-MiniLM-L6-cos-v1 but lags related but different topics
+        self.similarity_window = deque(maxlen = 3)
 
-    def print_agent_info(self, agent: Agent) -> None:
-        print(f"Initializing Chat agent {agent.get_colored_name()} with agent provider " + agent.llm_provider)
+    def log_agent_info(self, agent: Agent) -> None:
+        self.logger.info(f"Initializing Chat agent {agent.get_colored_name()} with agent provider " + agent.llm_provider)
 
     def init_setup(self):
-        self.llm_service_provider_factory = LLMServiceProviderFactory("configs/llm_provider_config.json")
-        self.llm_communication_service_factory = LLMCommunicationServiceFactory(self.llm_service_provider_factory)
+        llm_service_provider_factory = LLMServiceProviderFactory("configs/llm_provider_config.json")
+        llm_communication_service_factory = LLMCommunicationServiceFactory(llm_service_provider_factory)
+        self.chat_service = ChatService(llm_communication_service_factory)
+
         self.agent_service_factory = AgentServiceFactory("configs/agent_config.json")
-        self.user_bot = self.agent_service_factory.get_agent("siva") #user_bot
+        self.user_bot = self.agent_service_factory.get_agent("user_bot") #user_bot
         self.ai_bot = self.agent_service_factory.get_agent("ai_bot")
-        self.print_agent_info(self.user_bot)
-        self.print_agent_info(self.ai_bot)
 
-    def send_message(self, user_agent: Agent, ai_agent: Agent, prompt):
-        llm_communication_service: LlmCommunicationService = self.llm_communication_service_factory.get_communication_service(ai_agent.llm_provider)
-        response = llm_communication_service.send_message(user_agent, ai_agent, prompt, self.chat_history.get_history())
+        self.log_agent_info(self.user_bot)
+        self.log_agent_info(self.ai_bot)
+        self.logger.info("ChatDriver initialized with necessary services")
 
-        if not response:
-            return None
 
-        raw_text = ResponseParser.parse(response.text)
-        clean_text = ResponseParser.clean(raw_text)
-        self.chat_history.add_message(ai_agent, clean_text)
+    def did_reply_deviated_from_topic(self, message, topic_embedding):
+        message_embedding = self.sentence_transformer_model.encode(message,batch_size = 32, show_progress_bar = False)
 
-        if ai_agent.llm_provider != 'terminal':
-            print("\n")
-            ai_agent.print_name()
-            print(f"\033[{ai_agent.text_color}")
-            for line in textwrap.wrap(clean_text, 60):
-                print(line)
-            print("\033[0m")
-        return clean_text
+        similarity = cosine_similarity(topic_embedding.reshape(1,-1), message_embedding.reshape(1,-1))[0][0]
+        self.logger.debug("Cosine similarity between topic and message is {}".format(similarity))
+        self.similarity_window.append(similarity)
+        return (sum(self.similarity_window) / len(self.similarity_window)) < 0.15
 
+    def is_conversation_over(self, message: str) -> bool:
+        end_keywords = ["bye", "exit", "quit", "goodbye", "see you"]
+        if any(kw in message.lower() for kw in end_keywords):
+            return True
+        return False
 
     def start_chat(self, topic: str):
-        message = f"Hello! How are you?, Do you know what's going on around {topic}"
+        topic_embedding = self.sentence_transformer_model.encode(topic, show_progress_bar = False)
+        message = f"Hello! How are you?, I would like to explore about {topic}"
         self.chat_history.add_message(self.user_bot, message)
 
         print(f"\033[{self.user_bot.text_color}{self.user_bot.name}: {message}\033[0m")
 
         message += "\nYou are a strict bot. Only respond with the person speaking. Do not include any narrative, actions, or descriptions"
 
-
         while True:
             prompt = self.chat_history.history[-1]['message']
-            bot_reply = self.send_message(self.user_bot, self.ai_bot, prompt)
-            if not bot_reply:
-                print("Bot failed to respond. Ending chat.")
-                break
+            bot_reply = self.chat_service.ask_prompt(self.user_bot, self.ai_bot, prompt, self.chat_history)
+
+
+            if self.ai_bot.off_topic_check_enabled and self.did_reply_deviated_from_topic(bot_reply, topic_embedding):
+                #off-topic check only for responder bot
+                self.warn_other_agent(self.user_bot, topic)
+                continue
 
             # Swap roles for next message
             prompt = self.chat_history.history[-1]['message']
-            user_reply = self.send_message(self.ai_bot, self.user_bot, prompt)
+            user_reply = self.chat_service.ask_prompt(self.ai_bot, self.user_bot, prompt, self.chat_history)
 
-            if not user_reply:
-                print("User bot failed to respond. Ending chat.")
-                break
+            ''' #do not do off-topic validation for user bots as it is a question asking bot
+                if self.user_bot.off_topic_check_enabled and self.did_reply_deviated_from_topic(user_reply, topic_embedding):
+                    self.warn_other_agent(self.ai_bot, topic)
+                    continue
+            '''
+
+            if self.is_conversation_over(user_reply) or self.is_conversation_over(bot_reply):
+                self.logger.info("Conversation over....")
+                return
+
+    def warn_other_agent(self, agent: Agent, topic):
+        warning_message = "Let us not jump outside the topic " + topic
+        print(f"{agent.get_colored_name()}\033[{agent.text_color}:\n{warning_message}\033[0m")
+        self.chat_history.add_message(agent, warning_message)
