@@ -52,9 +52,8 @@ class ChatDriver:
 
     def is_conversation_over(self, message: str) -> bool:
         end_keywords = ["bye", "exit", "quit", "goodbye", "see you"]
-        if any(kw in message.lower() for kw in end_keywords):
-            return True
-        return False
+        words = set(message.lower().split())
+        return not words.isdisjoint(end_keywords)
 
     def start_chat(self, topic: str):
         topic_embedding = self.sentence_transformer_model.encode(topic, show_progress_bar = False)
