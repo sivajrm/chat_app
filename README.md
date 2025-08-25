@@ -1,25 +1,57 @@
-**Steps:**
-1. Agent Configuration:
-    The agents (user agent(Terminal or AI based) and AI agent) are configured via agent_config.json. Each agent can select its LLM service provider
+# Chat App
 
-2. LLM Service Provider configuration:
-   LLM service provider related configs are maintained through the llm_provider_config.json. Each service provider can maintain their api-url, api-key, auth-token(can be extended to retrive from an oauth server), number of retries if there is a service error.
+## Overview
 
-3. Chat Driver:
-   The ChatDriver class acts as the main driver of the application. It initializes the necessary service classes, agents(user/ai based) and manages the flow of the interaction(conversation exchange, off-topic detection, end conversation detection).
+This application allows a user and AI agent to interact in a configurable chat environment. It can also accept Agent-Agent chat on a topic agreed in the beginning. The system is modular and supports multiple LLM service providers, off-topic detection, and terminal-based communication.
 
-4. Off-Topic Check:
-   Implemented a feature to monitor the AI bot’s responses using Sentence transformer model and cosine simularity. If the responder ai bot goes off-topic, the chat app automatically interrupts and sends a message to guide the bot back to the relevant topic on
-   behalf of the user. Configured the threshold as below 15% to detect as bot is going off-topic.
+---
 
-**Extensibility:**
-LLM Services:
-The LLM services used by the agents are modular and extensible. You can plug in any service provider (e.g., OpenAI, HuggingFace), provided the implementation is integrated in the code.
+## Steps
 
-Terminal Communication:
-When the user interacts with the AI bot, there is a support to interact for the end-user using TerminalCommunicationService class, which provides end user input as prompts to the AI agent to carry the conversation.
+### 1. Agent Configuration
 
-**Things to improve:**
-1. Communication classes can be extended to use a common Request exchance class
-2. Support for web-sockets as this is a chat-app so using a web-socket will improve the latency and consumption of network resources
-3. Extend this to a multi-agent chat room concept
+The agents (user agent — Terminal or AI based — and AI agent) are configured via `agent_config.json`. Each agent can select its preferred LLM service provider.
+
+### 2. LLM Service Provider Configuration
+
+The LLM service provider configurations are maintained in `llm_provider_config.json`. Each provider can define:
+
+* API URL
+* API key / auth token (can be extended to retrieve from an OAuth server)
+* Number of retries for service errors
+
+This allows flexible integration of different providers.
+
+### 3. Chat Driver
+
+The `ChatDriver` class acts as the main driver of the application. Responsibilities include:
+
+* Initializing necessary service classes and agents
+* Managing conversation flow
+* Detecting off-topic responses
+* Detecting end-of-conversation events
+
+### 4. Off-Topic Check
+
+A feature to monitor the AI bot’s responses using a **Sentence Transformer model** and **cosine similarity**.
+
+* If the AI responder goes off-topic, the chat app automatically interrupts and sends a message on behalf of the user to maintain topic relevance.
+* A similarity threshold of **15%** is used to flag off-topic responses.
+
+### 5. Extensibility: LLM Services
+
+The LLM services used by agents are **modular and extensible**. You can integrate any service provider (e.g., OpenAI, HuggingFace) as long as the implementation is provided in the code.
+
+### 6. Terminal Communication
+
+For user interaction, the `TerminalCommunicationService` class allows the end-user to provide prompts directly to the AI agent via the terminal.
+
+---
+
+## Things to Improve
+
+* Refactor communication classes to use a common **Request Exchange** class
+* Add **web-socket support** for lower latency and better network efficiency
+* Extend the system to a **multi-agent chat room** concept
+
+---
