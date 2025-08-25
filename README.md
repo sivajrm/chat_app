@@ -1,4 +1,4 @@
-**Steps: **
+**Steps:**
 1. Agent Configuration:
     The agents (user agent(Terminal or AI based) and AI agent) are configured via agent_config.json. Each agent can select its LLM service provider
 
