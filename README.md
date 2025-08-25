@@ -12,15 +12,14 @@
    Implemented a feature to monitor the AI bot’s responses using Sentence transformer model and cosine simularity. If the responder ai bot goes off-topic, the chat app automatically interrupts and sends a message to guide the bot back to the relevant topic on
    behalf of the user. Configured the threshold as below 15% to detect as bot is going off-topic.
 
-**Extensibility:
-**
+**Extensibility:**
 LLM Services:
 The LLM services used by the agents are modular and extensible. You can plug in any service provider (e.g., OpenAI, HuggingFace), provided the implementation is integrated in the code.
 
 Terminal Communication:
 When the user interacts with the AI bot, there is a support to interact for the end-user using TerminalCommunicationService class, which provides end user input as prompts to the AI agent to carry the conversation.
 
-Things to improve:
+**Things to improve:**
 1. Communication classes can be extended to use a common Request exchance class
 2. Support for web-sockets as this is a chat-app so using a web-socket will improve the latency and consumption of network resources
 3. Extend this to a multi-agent chat room concept
