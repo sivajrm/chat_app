@@ -1,4 +1,4 @@
-from collections import deque
+from collections import deque, defaultdict
 from typing import Optional
 
 from models.ChatHistory import ChatHistory
@@ -25,8 +25,9 @@ class ChatDriver:
         self.sentence_transformer_model = SentenceTransformer('multi-qa-MiniLM-L6-cos-v1') #better with multi-qa-MiniLM-L6-cos-v1 but lags related but different topics
         self.similarity_window = deque(maxlen = 3)
 
-    def log_agent_info(self, agent: Agent) -> None:
-        self.logger.info(f"Initializing Chat agent {agent.get_colored_name()} with agent provider " + agent.llm_provider)
+    def log_agent_info(self, agent: Agent, is_user : bool) -> None:
+        role = "User bot" if is_user else "AI bot"
+        self.logger.info(f"Initializing Chat agent {agent.get_colored_name()} as {role} with agent provider " + agent.llm_provider)
 
     def init_setup(self):
         llm_service_provider_factory = LLMServiceProviderFactory("configs/llm_provider_config.json")
@@ -34,12 +35,38 @@ class ChatDriver:
         self.chat_service = ChatService(llm_communication_service_factory)
 
         self.agent_service_factory = AgentServiceFactory("configs/agent_config.json")
-        self.user_bot = self.agent_service_factory.get_agent("user_bot") #user_bot
-        self.ai_bot = self.agent_service_factory.get_agent("ai_bot")
-
-        self.log_agent_info(self.user_bot)
-        self.log_agent_info(self.ai_bot)
         self.logger.info("ChatDriver initialized with necessary services")
+
+    def load_bots(self):
+        print("Loading pre-defined available bots for use...")
+        agents_by_type = defaultdict(list)
+
+        # Group agents by type
+        for agent in self.agent_service_factory.get_all_agents().values():
+            agents_by_type[agent.type].append(agent)
+
+        # Print grouped output
+        for agent_type, agents in agents_by_type.items():
+            print(f"\nType: {agent_type}")
+            print(f"{'Name':20} {'LLM Provider':20}")
+            print("-" * 40)
+            for agent in agents:
+                print(f"{agent.get_colored_name():20} {agent.llm_provider:20}")
+
+        self.user_bot = None
+        self.ai_bot = None
+
+        while self.user_bot is None or self.ai_bot is None:
+            user_bot_name = input("Please enter your user bot name to use: ").strip()
+            ai_bot_name = input("Please enter your ai bot name to use: ").strip()
+            self.user_bot = self.agent_service_factory.get_agent(user_bot_name)
+            self.ai_bot = self.agent_service_factory.get_agent(ai_bot_name)
+
+            if self.user_bot is None or self.ai_bot is None:
+                print("Invalid bot name(s). Please try again.")
+
+        self.log_agent_info(self.user_bot, True)
+        self.log_agent_info(self.ai_bot, False)
 
 
     def did_reply_deviated_from_topic(self, message, topic_embedding):

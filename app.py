@@ -6,5 +6,6 @@ if __name__ == "__main__":
 
     while True:
         print("Welcome to Chat App.... ")
-        topic = input("I would like to explore about : ")
+        chat_driver.load_bots()
+        topic = input("Bot acting as user would like to explore about : ")
         chat_driver.start_chat(topic)

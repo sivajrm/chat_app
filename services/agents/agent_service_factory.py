@@ -30,5 +30,8 @@ class AgentServiceFactory:
 
         return agents
 
+    def get_all_agents(self) -> dict[str, Agent]:
+        return self.agents
+
     def get_agent(self, agent_name: str) -> Agent:
-        return self.agents[agent_name]
+        return self.agents.get(agent_name)
