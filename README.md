@@ -10,7 +10,8 @@ This application allows a user and AI agent to interact in a configurable chat e
 
 ### 1. Agent Configuration
 
-The agents (user agent — Terminal or AI based — and AI agent) are configured via `agent_config.json`. Each agent can select its preferred LLM service provider.
+The agents (user agent — Terminal or AI based — and AI agent) are configured via `agent_config.json` containing name, type(acting as user/ai bot), color, llm_provider(terminal /chai_gpt). 
+Each agent(user / ai bots) can select from the config json during runtime its preferred agent config to use.
 
 ### 2. LLM Service Provider Configuration
 
@@ -26,10 +27,10 @@ This allows flexible integration of different providers.
 
 The `ChatDriver` class acts as the main driver of the application. Responsibilities include:
 
-* Initializing necessary service classes and agents
+* Initializing necessary service classes and agents. Choose the user-bot and ai-bot to use for this interaction
 * Managing conversation flow
 * Detecting off-topic responses
-* Detecting end-of-conversation events
+* Detecting end-of-conversation events (bye or exit or quit or goodbye or see you)
 
 ### 4. Off-Topic Check
 
