@@ -56,3 +56,73 @@ For user interaction, the `TerminalCommunicationService` class allows the end-us
 * Extend the system to a **multi-agent chat room** concept
 
 ---
+
+## Sample Output
+
+C:\Users\Siva\PyCharmMiscProject\.venv\Scripts\python.exe F:\PersonalProjects\chat_app\app.py 
+2025-09-06 21:34:56,590 - sentence_transformers.SentenceTransformer - INFO - Use pytorch device_name: cpu
+2025-09-06 21:34:56,590 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: multi-qa-MiniLM-L6-cos-v1
+2025-09-06 21:34:59,686 - ChatDriver - INFO - ChatDriver initialized with necessary services
+Welcome to Chat App.... 
+Loading pre-defined available bots for use...
+
+Type: user
+Name                 LLM Provider        
+----------------------------------------
+siva        terminal            
+user_bot    chai_gpt            
+
+Type: ai
+Name                 LLM Provider        
+----------------------------------------
+ai_bot      chai_gpt            
+Please enter your user bot name to use: siva
+Please enter your ai bot name to use: ai_bot
+2025-09-06 21:35:14,637 - ChatDriver - INFO - Initializing Chat agent siva as User bot with agent provider terminal
+2025-09-06 21:35:14,637 - ChatDriver - INFO - Initializing Chat agent ai_bot as AI bot with agent provider chai_gpt
+Bot acting as user would like to explore about : Cricket game
+siva: Hello! How are you?, I would like to explore about Cricket game
+
+
+ai_bot:
+"I'm great, thanks! Nice to meet you...?"
+
+siva:
+Let us not jump outside the topic Cricket game
+
+
+ai_bot:
+"Okay, I love cricket! Tell me, what's your favorite format
+- Tests, ODIs or T20s?"
+
+siva:
+How many players play the game??
+
+
+ai_bot:
+"In cricket, there are two teams, each consisting of 11
+players. So, a total of 22 players participate in a match.
+One team bats while the other bowls and fields. The game is
+played on a large oval-shaped field with a rectangular pitch
+in the center."
+
+siva:
+Bye
+
+2025-09-06 21:35:55,498 - ChatDriver - INFO - Conversation over....
+
+
+Welcome to Chat App.... 
+Loading pre-defined available bots for use...
+
+Type: user
+Name                 LLM Provider        
+----------------------------------------
+siva        terminal            
+user_bot    chai_gpt            
+
+Type: ai
+Name                 LLM Provider        
+----------------------------------------
+ai_bot      chai_gpt            
+Please enter your user bot name to use: 
